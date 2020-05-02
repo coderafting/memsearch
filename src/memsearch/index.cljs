@@ -1,0 +1,116 @@
+(ns memsearch.index
+  (:require [memsearch.stopwords :as sw]
+            [clj-fuzzy.phonetics :as ph]))
+
+;; Goal of indexing
+;; ---------------------
+;; Build index map out of a collection of documents (maps), such that
+;; each individual word of a document's content (containing one or more words) can be the keys of the index map,
+;; so that search can be of order O(1) for all practical purposes.
+
+(defn 
+  ^{:doc "This is the default string sanitization function."
+    :todo "An option should be provided to users to allow for custom prep functions."}
+  prep-string
+  [s]
+  (-> s
+      (clojure.string/replace "\n" " ")
+      (clojure.string/replace #"[^A-Za-z0-9 ]" "")
+      (clojure.string/lower-case)))
+
+(defn 
+  ^{:doc "This is the default word validation function."
+    :todo "An option should be provided to users to allow for custom validator functions."}
+  valid-word?
+  [s]
+  (let [st (clojure.string/trim (clojure.string/replace s "\n" " "))]
+    (and
+     (not (sw/stop-words st))
+     (> (count st) 1))))
+
+(declare prep-string-coll)
+
+(defn string-vec-helper
+  [s]
+  (let [str-coll (clojure.string/split s #" ")]
+    (if (> (count str-coll) 1)
+      (prep-string-coll str-coll)
+      s)))
+
+(defn prep-string-coll
+  "Creates a collection of prepped and valid words. Input is a collection of strings.
+   Users may provide their own stop-words map."
+  [str-coll & valid-word-fn]
+  (flatten (remove nil? (map #(if (if (first valid-word-fn) ((first valid-word-fn) %) (valid-word? %))
+                                (string-vec-helper (prep-string %)))
+                             str-coll))))
+
+(defn index-keys-from-string
+  "Creates a collection of prepped and valid words from a string.
+   Users may provide their own stop-words map."
+  ([s] (prep-string-coll (clojure.string/split s #" ")))
+  ([s valid-word-fn] (prep-string-coll (clojure.string/split s #" ") valid-word-fn)))
+
+(defn index-map-from-doc
+  "Builds an index map from a document. A document is a map with two keys - :id and :content.
+   The :id is the unique identifier for the document that the users can use during search to get the actual document.
+   The :content key is the string whose words will be indexed.
+   Users may provide hint (true) to maintain the actual indexed words along with the encoded form of the words.
+   However, maintaining actual words will consume additional space.
+   Sample input: 
+   ```
+   (index-map-from-doc {:id 1 :content \"World War 1\"} true)
+   ```
+   Sample output: 
+   ``` 
+   {\"W643\" [{:id 1, :actuals #{\"world\"}, :frequency 1}]
+    \"W600\" [{:id 1, :actuals #{\"war\"}, :frequency 1}]}
+   ```
+   The :id is the same as supplied by the user. 
+   The value of :actuals will be nil if maintain-actual? (true) hint is not provided.
+   The value of :frequency is the frequency of the word in the :content string."
+  [{:keys [id content]} & maintain-actual?]
+  (let [keys-coll (index-keys-from-string content)]
+    (loop [ks keys-coll
+           res {}]
+      (if (first ks)
+        (recur (rest ks) 
+               (let [soundex-code (ph/soundex (first ks))]
+                 (assoc res soundex-code
+                        [{:id id
+                          :actuals (if (first maintain-actual?) 
+                                     (set (conj (:actuals (first (res soundex-code))) (first ks)))) 
+                          :frequency (inc (:frequency (first (res soundex-code))))}])))
+        res))))
+
+(defn build-index
+  "Builds the final index map from a collection of documents. A document is a map with two keys - :id and :content.
+   The :id is the unique identifier for the document that the users can use during search to get the actual document.
+   The :content key is the string whose words will be indexed.
+   Users may provide hint (true) to maintain the actual indexed words along with the encoded form of the words.
+   However, maintaining actual words will consume additional space.
+   Sample input: 
+   ```
+   (build-index [{:id 1 :content \"World war 1\"}
+                 {:id 2 :content \"Independence of the world\"}]
+                true)
+   ```
+   Sample output: 
+   ```
+   {\"W643\" [{:id 1, :actuals #{\"world\"}, :frequency 1}
+              {:id 2, :actuals #{\"world\"}, :frequency 1}]
+    \"W600\" [{:id 1, :actuals #{\"war\"}, :frequency 1}]
+    \"I531\" [{:id 2, :actuals #{\"independence\"}, :frequency 1}]}
+   ```
+   The :id is the same as supplied by the user. 
+   The value of :actuals will be nil if maintain-actual? (true) hint is not provided.
+   The value of :frequency is the frequency of the word in the :content string."
+  [doc-coll & maintain-actual?]
+  (loop [docs doc-coll
+         res {}]
+    (if (first docs)
+      (recur (rest docs) (let [i (if (first maintain-actual?) 
+                                   (index-map-from-doc (first docs) true)
+                                   (index-map-from-doc (first docs)))]
+                           (merge-with into res i)))
+      res)))
