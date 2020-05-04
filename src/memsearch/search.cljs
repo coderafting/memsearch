@@ -1,18 +1,9 @@
 (ns memsearch.search
-  (:require [memsearch.stopwords :as sw]
-            [memsearch.index :as in]
-            [clj-fuzzy.stemmers :as st]
+  (:require [memsearch.index :as in]
             [clj-fuzzy.metrics :as fm]
-            [clj-fuzzy.phonetics :as ph]
-            [clojure.math.combinatorics :as combo]))
+            [clj-fuzzy.phonetics :as ph]))
 
-(def test-index
-  {"W643" [{:id 1, :actuals #{"world"}, :frequency 2}
-           {:id 2, :actuals #{"worlds" "world"}, :frequency 2}]
-   "W600" [{:id 1, :actuals #{"war"}, :frequency 1}
-           {:id 2, :actuals #{"war"}, :frequency 1}]
-   "I531" [{:id 2, :actuals #{"independence" "indepandance"}, :frequency 2}
-           {:id 3, :actuals #{"independence"}, :frequency 1}]})
+
 
 
 (defn fetch-docs-for-a-word
@@ -61,6 +52,7 @@
                            (assoc res (first ks) (m2 (first ks)))))
         res))))
 
+
 (defn scored-docs-for-str-coll
   [s-coll index]
   (loop [strs s-coll
@@ -73,34 +65,44 @@
                                  (fetch-docs-for-a-word (first strs) index))))
       res)))
 
+(defn score-comparator
+  [m & increasing?]
+  (fn [key1 key2]
+    (let [v1 [(get-in m [key1 :score]) key1]
+          v2 [(get-in m [key2 :score]) key2]]
+      (if (first increasing?)
+        (compare v1 v2)
+        (compare v2 v1)))))
+
 (defn sorted-scored-docs
-  [s-coll index]
+  [s-coll index & increasing?]
   (let [res (scored-docs-for-str-coll s-coll index)]
-    (into (sorted-map-by (fn [key1 key2]
-                           (compare [(get-in res [key2 :score]) key2]
-                                    [(get-in res [key1 :score]) key1]))) 
+    (into (sorted-map-by (if (first increasing?) (score-comparator res true) (score-comparator res))) 
           res)))
 
 (defn scored-docs
-  [s-coll index & sorted?]
-  (if (first sorted?)
-    (sorted-scored-docs s-coll index)
-    (scored-docs-for-str-coll s-coll index)))
+  [s-coll index & opts-map]
+  (let [opts (first opts-map)
+        sorted? (:sorted? opts)
+        increasing? (:increasing? opts)]
+    (cond 
+      (and sorted? increasing?) (sorted-scored-docs s-coll index true)
+      (and sorted? (not increasing?)) (sorted-scored-docs s-coll index)
+      :else (scored-docs-for-str-coll s-coll index))))
 
 (defn default-fetch-fn
   "The db is expected to be a map with doc-ids as keys and maps as values.
   Each value map may contain the data that needs to come out of the db."
   [db doc-ids]
-  (transduce (map db) (into {}) doc-ids))
+  (into {} (map #(hash-map % (db %))) doc-ids))
 
 (defn scored-docs-with-data
-  "The db is expected to be a map with doc-ids as keys and maps as values.
+  "If a custom fetch fn is not provided in the opts-map,
+   then the db is expected to be a map with doc-ids as keys and maps as values.
    The return value of fetch-fn is expected to be a map or a coll similar to:
    {1 {:data {}} 2 {:data {}}} or [{1 {:data {}}} {2 {:data {}}}]"
   [s-coll index db & opts-map]
-  (let [docs (if (:sorted? (first opts-map))
-               (scored-docs s-coll index true)
-               (scored-docs s-coll index))
+  (let [docs (scored-docs s-coll index (first opts-map))
         ids (keys docs)
         custom-fetch-fn (:fetch-fn (first opts-map))
         docs-data (if custom-fetch-fn (custom-fetch-fn db ids)
@@ -115,21 +117,12 @@
                                  res))
       :else docs)))
 
-; (index-keys-from-string s valid-word-fn)
 (defn search
+  "The valid-word-fn is a single arity fn that takes one word (string) and returns boolean."
   [query-string index & opts-map]
   (let [opts (first opts-map)
         db (:db opts)
-        sorted? (:sorted? opts)
-        valid-word-fn (:valid-word-fn opts)]
-    "WIP - I am here"))
-
-
-;(scored-docs-for-str-coll ["war" "independence"] test-index)
-;(merge-with into (sorted-scored-docs ["war" "independence"] test-index)
-;            {1 {:data {}}})
-
-;; TODOs:
-;; 1. The sorting of result can be based on another function that the user could provide.
-;; 2. Filter searched results based on a minimum score
-;; 3. Add more words to stop-words list
+        str-coll (in/index-keys-from-string query-string (:valid-word-fn opts))]
+    (if db
+      (scored-docs-with-data str-coll index db opts)
+      (scored-docs str-coll index opts))))

@@ -56,3 +56,26 @@
  "O200" [{:id 3, :actuals #{"okay"}, :frequency 1}]}
 
 ;(prep-string-coll (clojure.string/split "My name is india\nokay world war" #" "))
+
+#_(def test-index
+  {"W643" [{:id 1, :actuals #{"world"}, :frequency 2}
+           {:id 2, :actuals #{"worlds" "world"}, :frequency 2}]
+   "W600" [{:id 1, :actuals #{"war"}, :frequency 1}
+           {:id 2, :actuals #{"war"}, :frequency 1}]
+   "I531" [{:id 2, :actuals #{"independence" "indepandance"}, :frequency 2}
+           {:id 3, :actuals #{"independence"}, :frequency 1}]})
+
+#_(sorted-scored-docs ["war" "independence"] test-index true)
+#_(scored-docs ["war" "independence"] test-index {:sorted? true :increasing? true})
+#_(scored-docs ["war" "independence"] test-index nil)
+#_(scored-docs-with-data ["war" "independence"] test-index {1 {:data "my-data"}})
+#_(scored-docs-with-data ["war" "independence"] test-index {1 {:data "my-data"}}
+                       {:sorted? true :increasing? true})
+
+#_(defn my-valid-fn [w] (not= "war" w))
+
+#_(search "war of independence" test-index
+        {:db {1 {:data "my-data"}}
+         :sorted? true
+         :increasing? true
+         :valid-word-fn my-valid-fn})

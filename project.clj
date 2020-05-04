@@ -7,8 +7,8 @@
   :dependencies
   [[org.clojure/clojure "1.10.1" :scope "provided"]
    [org.clojure/clojurescript "1.10.597" :scope "provided"]
-   [clj-fuzzy "0.4.1" :exclusions [org.clojure/clojure]]
-   [org.clojure/math.combinatorics "0.1.6"]]
+   [clj-fuzzy "0.4.1" :exclusions [org.clojure/clojure]]]
+   ;[org.clojure/math.combinatorics "0.1.6"]]
 
   :plugins
   [[lein-cljsbuild "1.1.7"]

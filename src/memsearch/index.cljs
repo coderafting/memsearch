@@ -95,7 +95,8 @@
    The :content key is the string whose words will be indexed.
    Users may provide an opts-map with keys :maintain-actual? and :valid-word-fn.
     - When :maintain-actual? is true, the actual indexed words along with the encoded form of the words.
-    - The :valid-word-fn is a custom word validator that users may provide.
+    - The value of :valid-word-fn is a custom word validator that users may provide.
+   The value of :valid-word-fn is a single arity fn that takes one word (string) and returns boolean.
    Note that maintaining actual words will consume additional space.
    Sample input: 
    ```
@@ -121,3 +122,7 @@
                                    (index-map-from-doc (first docs)))]
                            (merge-with into res i)))
       res)))
+
+;; TODO
+;; - Save index to disk
+;; - load index in app memory
