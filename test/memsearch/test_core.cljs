@@ -14,7 +14,7 @@
 
 #_(build-index [{:id 1 :content "world world war"}
               {:id 2 :content "world's world war of independence indepandance"}]
-             true)
+             {:maintain-actual? true})
 
 #_{"W643"
  [{:id 1, :actuals #{"world"}, :frequency 2}
@@ -29,9 +29,30 @@
               {:id 2 :content "world's world war of independence indepandance"}])
 
 #_{"W643"
- [{:id 1, :actuals nil, :frequency 2}
-  {:id 2, :actuals nil, :frequency 2}]
+ [{:id 1, :frequency 2}
+  {:id 2, :frequency 2}]
  "W600"
- [{:id 1, :actuals nil, :frequency 1}
-  {:id 2, :actuals nil, :frequency 1}]
- "I531" [{:id 2, :actuals nil, :frequency 2}]}
+ [{:id 1, :frequency 1}
+  {:id 2, :frequency 1}]
+ "I531" [{:id 2, :frequency 2}]}
+
+#_(build-index [{:id 1 :content "world world war"}
+              {:id 2 :content "world's world war of independence indepandance"}
+              {:id 3 :content "My name is india\nokay world war"}]
+             {:maintain-actual? true})
+
+#_{"W643"
+ [{:id 1, :actuals #{"world"}, :frequency 2}
+  {:id 2, :actuals #{"worlds" "world"}, :frequency 2}
+  {:id 3, :actuals #{"world"}, :frequency 1}]
+ "W600"
+ [{:id 1, :actuals #{"war"}, :frequency 1}
+  {:id 2, :actuals #{"war"}, :frequency 1}
+  {:id 3, :actuals #{"war"}, :frequency 1}]
+ "I531"
+ [{:id 2, :actuals #{"independence" "indepandance"}, :frequency 2}]
+ "N500" [{:id 3, :actuals #{"name"}, :frequency 1}]
+ "I530" [{:id 3, :actuals #{"india"}, :frequency 1}]
+ "O200" [{:id 3, :actuals #{"okay"}, :frequency 1}]}
+
+;(prep-string-coll (clojure.string/split "My name is india\nokay world war" #" "))

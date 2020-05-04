@@ -1,5 +1,8 @@
 (ns memsearch.stopwords)
 
+; ;; 4. Add more words to stop-words list
+; https://geeklad.com/remove-stop-words-in-javascript
+; https://stackoverflow.com/questions/5631422/stop-word-removal-in-javascript
 (def stop-words
   {"a" true
    "about" true
