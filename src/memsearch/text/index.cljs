@@ -38,7 +38,7 @@
 
 (defn prep-string-coll
   "Creates a collection of prepped and valid words. Input is a collection of strings.
-   Users may provide their own valid-word-fn."
+   Users may provide their own `valid-word-fn`."
   [str-coll & valid-word-fn]
   (flatten (remove nil? (map #(if (if (first valid-word-fn) ((first valid-word-fn) %) (valid-word? %))
                                 (string-vec-helper (prep-string %)))
@@ -46,17 +46,17 @@
 
 (defn index-keys-from-string
   "Creates a collection of prepped and valid words from a string.
-   Users may provide their own valid-word-fn."
+   Users may provide their own `valid-word-fn`."
   ([s] (prep-string-coll (clojure.string/split s #" ")))
   ([s valid-word-fn] (prep-string-coll (clojure.string/split s #" ") valid-word-fn)))
 
 (defn index-map-from-doc
-  "Builds an index map from a document. A document is a map with two keys - :id and :content.
-   The :id is the unique identifier for the document that the users can use during search to get the actual document.
-   The :content key is the string whose words will be indexed.
-   Users may provide an opts-map with keys :maintain-actual? and :valid-word-fn.
-    - When :maintain-actual? is true, the actual indexed words along with the encoded form of the words.
-    - The :valid-word-fn is a custom word validator that users may provide.
+  "Builds an index map from a document. A document is a map with two keys - `:id` and `:content`.
+   The `:id` is the unique identifier for the document that the users can use during search to get the actual document.
+   The `:content` key is the string whose words will be indexed.
+   Users may provide an opts-map with keys `:maintain-actual?` and `:valid-word-fn`.
+    - When `:maintain-actual?` is `true`, the actual indexed words along with the encoded form of the words.
+    - The `:valid-word-fn` is a custom word validator that users may provide.
    Note that maintaining actual words will consume additional space.
    Sample input: 
    ```
@@ -67,8 +67,8 @@
    {\"W643\" [{:id 1, :actuals #{\"world\"}, :frequency 1}]
     \"W600\" [{:id 1, :actuals #{\"war\"}, :frequency 1}]}
    ```
-   The :id is the same as supplied by the user. 
-   The value of :frequency is the frequency of the word in the :content string."
+   The `:id` is the same as supplied by the user. 
+   The value of `:frequency` is the frequency of the word in the `:content` string."
   [{:keys [id content]} & opts-map]
   (let [valid-word-fn (:valid-word-fn (first opts-map))
         keys-coll (if valid-word-fn 
@@ -89,13 +89,13 @@
         res))))
 
 (defn text-index
-  "Builds the final index map from a collection of documents. A document is a map with two keys - :id and :content.
-   The :id is the unique identifier for the document that the users can use during search to get the actual document.
-   The :content key is the string whose words will be indexed.
-   Users may provide an opts-map with keys :maintain-actual? and :valid-word-fn.
-    - When :maintain-actual? is true, the actual indexed words are saved along with the encoded form of the words.
-    - The value of :valid-word-fn is a custom word validator that users may provide.
-   The value of :valid-word-fn is a single arity fn that takes one word (string) and returns boolean.
+  "Builds the final index map from a collection of documents. A document is a map with two keys - `:id` and `:content`.
+   The `:id` is the unique identifier for the document that the users can use during search to get the actual document.
+   The `:content` key is the string whose words will be indexed.
+   Users may provide an opts-map with keys `:maintain-actual?` and `:valid-word-fn`.
+    - When `:maintain-actual?` is `true`, the actual indexed words are saved along with the encoded form of the words.
+    - The value of `:valid-word-fn` is a custom word validator that users may provide.
+   The value of `:valid-word-fn` is a single arity fn that takes one word (string) and returns boolean.
    Note that maintaining actual words will consume additional space.
    Sample input: 
    ```
@@ -110,8 +110,8 @@
     \"W600\" [{:id 1, :actuals #{\"war\"}, :frequency 1}]
     \"I531\" [{:id 2, :actuals #{\"independence\"}, :frequency 1}]}
    ```
-   The :id is the same as supplied by the user. 
-   The value of :frequency is the frequency of the word in the :content string."
+   The `:id` is the same as supplied by the user. 
+   The value of `:frequency` is the frequency of the word in the `:content` string."
   [doc-coll & opts-map]
   (loop [docs doc-coll
          res {}]

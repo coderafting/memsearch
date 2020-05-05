@@ -55,17 +55,17 @@ Examples below:
                {:maintain-actual? true})
 =>
     {"W643" [{:id 1, :actuals #{"world"}, :frequency 1}
-            {:id 2, :actuals #{"world"}, :frequency 1}]
-    "W600" [{:id 1, :actuals #{"war"}, :frequency 1}]
-    "I531" [{:id 2, :actuals #{"independence"}, :frequency 1}]}
+             {:id 2, :actuals #{"world"}, :frequency 1}]
+     "W600" [{:id 1, :actuals #{"war"}, :frequency 1}]
+     "I531" [{:id 2, :actuals #{"independence"}, :frequency 1}]}
 
 (ms/text-index [{:id 1 :content "World war 1"}
                 {:id 2 :content "Independence for the world"}])
 =>
     {"W643" [{:id 1, :frequency 1}
-            {:id 2, :frequency 1}]
-    "W600" [{:id 1, :frequency 1}]
-    "I531" [{:id 2, :frequency 1}]}
+             {:id 2, :frequency 1}]
+     "W600" [{:id 1, :frequency 1}]
+     "I531" [{:id 2, :frequency 1}]}
 ```
 The `:id`s are same as the ones supplied by the user in the input docs. The value of `:frequency` is the frequency of the word in the `:content` string.
 
