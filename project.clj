@@ -1,6 +1,6 @@
 (defproject coderafting/memsearch "0.1.0"
   :author "Amarjeet Yadav <https://www.coderafting.com/>"
-  :description "A ClojureScript library to provide in-memory full-text search facility."
+  :description "A ClojureScript library to provide in-memory full-text indexing and search facilities."
   :url "https://github.com/coderafting/memsearch"
   :license {:name "The MIT License"
             :url "https://opensource.org/licenses/MIT"}
@@ -8,8 +8,7 @@
   [[org.clojure/clojure "1.10.1" :scope "provided"]
    [org.clojure/clojurescript "1.10.597" :scope "provided"]
    [clj-fuzzy "0.4.1" :exclusions [org.clojure/clojure]]]
-   ;[org.clojure/math.combinatorics "0.1.6"]]
-
+  
   :plugins
   [[lein-cljsbuild "1.1.7"]
    [lein-figwheel "0.5.19"]

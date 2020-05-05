@@ -1,38 +1,37 @@
-(ns memsearch.search
-  (:require [memsearch.index :as in]
+(ns memsearch.text.search
+  (:require [memsearch.text.index :as in]
             [clj-fuzzy.metrics :as fm]
             [clj-fuzzy.phonetics :as ph]))
 
-
-
-
 (defn fetch-docs-for-a-word
+  "Fetches all the indexed docs for a word."
   [w index]
   (index (ph/soundex w)))
 
-;(fetch-docs-for-a-word "war" test-index)
-
 (defn highest-similarity
+  "Returns the similarilty value (between 0 and 1, both inclusive) for a word 
+  against the best similar word from a set of words."
   [w str-set]
   (let [st (first (sort-by #(fm/jaro-winkler w %) > str-set))]
     (fm/jaro-winkler w st)))
-;(highest-similarity "independence" #{"independenc" "independ" "indepandance" "india"})
 
 (defn scored-doc-for-a-word
+  "Returns a map with doc-id as key and a map (with :score) as value.
+   The supplied doc is expected to have :id and :frequency of the supplied word."
   [w doc]
   (if (:actuals doc)
     {(:id doc) {:score (* (highest-similarity w (:actuals doc)) (:frequency doc))}}
     {(:id doc) {:score (:frequency doc)}}))
 
 (defn scored-docs-for-word
+  "Returns a map with doc-ids as keys and a maps (with :score) as values.
+   The supplied docs are expected to have :id and :frequency of the supplied word."
   [w docs]
   (loop [ds docs
          res {}]
     (if (first ds)
       (recur (rest ds) (into res (scored-doc-for-a-word w (first ds))))
       res)))
-
-;(scored-docs-for-word "world" (test-index "W643"))
 
 (defn merge-scored-docs
   "Example inputs: {1 {:score 10 :data {:age 20}}} and {1 {:score 12 :data {:age 20}} 2 {:score 5 :data {:age 30}}}
@@ -54,6 +53,9 @@
 
 
 (defn scored-docs-for-str-coll
+  "Fetches the docs for all the valid words of the supplied collection.
+   The score for each fetched doc is combined (added) for each word of the words collection, 
+   to compute the final socre for the doc."
   [s-coll index]
   (loop [strs s-coll
          res {}]
@@ -66,6 +68,8 @@
       res)))
 
 (defn score-comparator
+  "Sorting comparator based on the score, either in increasing or in decreasing order.
+   Defaults to decreasing order."
   [m & increasing?]
   (fn [key1 key2]
     (let [v1 [(get-in m [key1 :score]) key1]
@@ -75,12 +79,17 @@
         (compare v2 v1)))))
 
 (defn sorted-scored-docs
+  "Results sorted by score, either in increasing or in decreasing order.
+   Defaults to decreasing order."
   [s-coll index & increasing?]
   (let [res (scored-docs-for-str-coll s-coll index)]
     (into (sorted-map-by (if (first increasing?) (score-comparator res true) (score-comparator res))) 
           res)))
 
 (defn scored-docs
+  "Results from the index map based on the supplied words collection.
+   Return value may or may not be sorted based on provided options.
+   Defaults to non-sorted result."
   [s-coll index & opts-map]
   (let [opts (first opts-map)
         sorted? (:sorted? opts)
@@ -97,8 +106,7 @@
   (into {} (map #(hash-map % (db %))) doc-ids))
 
 (defn scored-docs-with-data
-  "If a custom fetch fn is not provided in the opts-map,
-   then the db is expected to be a map with doc-ids as keys and maps as values.
+  "If a custom fetch fn is not provided in the opts-map, then the db is expected to be a map with doc-ids as keys and maps as values.
    The return value of fetch-fn is expected to be a map or a coll similar to:
    {1 {:data {}} 2 {:data {}}} or [{1 {:data {}}} {2 {:data {}}}]"
   [s-coll index db & opts-map]
@@ -117,8 +125,16 @@
                                  res))
       :else docs)))
 
-(defn search
-  "The valid-word-fn is a single arity fn that takes one word (string) and returns boolean."
+(defn text-search
+  "Search the index with a string of one or more words.
+   Various options can be provided:
+    :db - If provided, the return value will contain additional data from the db based on the doc-ids returned by the index.
+    :fetch-fn - A function with args signature `[db doc-ids]`. Exists only with :db key.
+                It is expected to return results in the form similar to {1 {:data {}} 2 {:data {}}} or [{1 {:data {}}} {2 {:data {}}}].
+                The key `:data `and its value could be any ley and value.
+    :sorted? - If `true`, the result should be sorted. Defaults to decreasing order of sorting.
+    :increasing? - Exists only with :sorted? key, a `true` value indicates the sorting to be in the increasing order.
+    :valid-word-fn - A single arity fn that takes one word (string) and returns boolean."
   [query-string index & opts-map]
   (let [opts (first opts-map)
         db (:db opts)

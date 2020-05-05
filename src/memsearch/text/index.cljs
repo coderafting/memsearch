@@ -1,12 +1,11 @@
-(ns memsearch.index
-  (:require [memsearch.stopwords :as sw]
+(ns 
+ ^{:todo {1 "Save index to disk"
+          2 "Load index in app memory"
+          3 "Append, Update, and Delete docs to/from index"
+          4 "Sync with the saved index on every dynamic mutation of the index"}}
+  memsearch.text.index
+  (:require [memsearch.text.stopwords :as sw]
             [clj-fuzzy.phonetics :as ph]))
-
-;; Goal of indexing
-;; ---------------------
-;; Build index map out of a collection of documents (maps), such that
-;; each individual word of a document's content (containing one or more words) can be the keys of the index map,
-;; so that search can be of order O(1) for all practical purposes.
 
 (defn 
   ^{:doc "This is the default string sanitization function."
@@ -89,20 +88,20 @@
                             :frequency (inc (:frequency (first (res soundex-code))))})])))
         res))))
 
-(defn build-index
+(defn text-index
   "Builds the final index map from a collection of documents. A document is a map with two keys - :id and :content.
    The :id is the unique identifier for the document that the users can use during search to get the actual document.
    The :content key is the string whose words will be indexed.
    Users may provide an opts-map with keys :maintain-actual? and :valid-word-fn.
-    - When :maintain-actual? is true, the actual indexed words along with the encoded form of the words.
+    - When :maintain-actual? is true, the actual indexed words are saved along with the encoded form of the words.
     - The value of :valid-word-fn is a custom word validator that users may provide.
    The value of :valid-word-fn is a single arity fn that takes one word (string) and returns boolean.
    Note that maintaining actual words will consume additional space.
    Sample input: 
    ```
-   (build-index [{:id 1 :content \"World war 1\"}
-                 {:id 2 :content \"Independence for the world\"}]
-                {:maintain-actual? true})
+   (text-index [{:id 1 :content \"World war 1\"}
+                {:id 2 :content \"Independence for the world\"}]
+               {:maintain-actual? true})
    ```
    Sample output: 
    ```
@@ -123,6 +122,5 @@
                            (merge-with into res i)))
       res)))
 
-;; TODO
-;; - Save index to disk
-;; - load index in app memory
+;; Persistence
+;; See TODOs in the ns meta
