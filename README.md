@@ -45,7 +45,7 @@ A document is a map with two keys - `:id` and `:content`.
 Users may provide an `opts-map` with keys `:maintain-actual?` and `:valid-word-fn`.
 
 - When `:maintain-actual?` is `true`, the actual indexed words are saved along with the encoded form of the words. Ofcourse, maintaining actual words will consume additional space.
-- The value of `:valid-word-fn` is a custom word validator that users may provide. The library uses its own validator as default validator. The value of `:valid-word-fn` is a single arity function that takes one word (string) and returns boolean.
+- The value of `:valid-word-fn` is a custom word validator that users may provide. The library uses its own validator as the default validator. The value of `:valid-word-fn` is a single arity function that takes one word (string) and returns boolean.
 
 Examples below:
 
@@ -67,7 +67,7 @@ Examples below:
     "W600" [{:id 1, :frequency 1}]
     "I531" [{:id 2, :frequency 1}]}
 ```
-The `:id` is the same as supplied by the user. The value of `:frequency` is the frequency of the word in the `:content` string.
+The `:id`s are same as the ones supplied by the user in the input docs. The value of `:frequency` is the frequency of the word in the `:content` string.
 
 Please see the **TODOs** section for future plans to improvise indexing.
 
@@ -83,7 +83,7 @@ And example of `query-string` is `"knuth on programming"`. The `index` is expect
 The `opts-map` can have the following keys:
 
 - `:db` - If provided, the return value will contain additional data from the db based on the doc-ids returned by the index.
-- `:fetch-fn` - A function with args signature `[db doc-ids]`. It exists only with `:db` key. It is expected to return results in the form similar to `{1 {:data {}} 2 {:data {}}}` or `[{1 {:data {}}} {2 {:data {}}}]`. The key `:data` and its value could be any ley and value.
+- `:fetch-fn` - A function with args signature `[db doc-ids]`. It exists only with `:db` key. It is expected to return results in the form similar to `{1 {:data {}} 2 {:data {}}}` or `[{1 {:data {}}} {2 {:data {}}}]`. The key `:data` and its value could be any key and value.
 - `:sorted?` - If `true`, the result will be sorted. Defaults to decreasing order of sorting.
 - `:increasing?` - Exists only with `:sorted?` key, a `true` value indicates the sorting to be in the increasing order.
 - `:valid-word-fn` - A single arity function that takes one word (string) and returns boolean.
@@ -114,6 +114,8 @@ Examples below:
 The :data key is coming from the db, it can be any key and value.
 ```
 
+Please see the **TODOs** section for future plans to improvise search.
+
 ## Feedback/Discussions
 Github issues are a good way to discuss library related topics. I am also reachable via [CodeRafting](https://www.coderafting.com/).
 
@@ -121,11 +123,13 @@ Github issues are a good way to discuss library related topics. I am also reacha
 
 #### General
 - `Clj` compatibility
+- Input validators
+- Benchmarks at different scales
 
 #### Search and Index Improvization
-- While computing score, take into account the relative distance between any two words (of the search string) in the results' content. In order to achieve this, the index will have to maintain the position(s) of the word in the documents' content. This becomes important when the content of the document is large (ex: a blog).
-- Consideration of the weights of words based on what content they exist in. In order to achieve this, the index will have to take different types of contents into account. Ex: `{:content {:title "" :blog ""}}`.
-- Usage of eager evaluation model paradigm to gain performance with some custom transducers. This will be helpful for large data-set (either content of the doc is large or large number of docs or both).
+- While computing score, take into account the `relative distance` between any two words (of the search string) in the results' content. In order to achieve this, the index will have to maintain the position(s) of the word in the documents' content. This becomes important when the content of the document is large (ex: a blog).
+- Consideration of the `weights of words` based on what content they exist in. In order to achieve this, the index will have to take different types of contents into account. Ex: `{:content {:title "" :blog ""}}`.
+- Adopt `eager evaluation paradigm` to gain performance with some custom transducers. This will be helpful for large data-set (either content of the doc is large or large number of docs or both).
 
 #### Index persistence
 - Save index to disk

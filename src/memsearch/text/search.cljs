@@ -131,7 +131,7 @@
     :db - If provided, the return value will contain additional data from the db based on the doc-ids returned by the index.
     :fetch-fn - A function with args signature `[db doc-ids]`. Exists only with :db key.
                 It is expected to return results in the form similar to {1 {:data {}} 2 {:data {}}} or [{1 {:data {}}} {2 {:data {}}}].
-                The key `:data `and its value could be any ley and value.
+                The key `:data `and its value could be any key and value.
     :sorted? - If `true`, the result should be sorted. Defaults to decreasing order of sorting.
     :increasing? - Exists only with :sorted? key, a `true` value indicates the sorting to be in the increasing order.
     :valid-word-fn - A single arity fn that takes one word (string) and returns boolean."
