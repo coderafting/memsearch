@@ -8,7 +8,6 @@
   [[org.clojure/clojure "1.10.1" :scope "provided"]
    [org.clojure/clojurescript "1.10.597" :scope "provided"]
    [clj-fuzzy "0.4.1" :exclusions [org.clojure/clojure]]]
-  
   :plugins
   [[lein-cljsbuild "1.1.7"]
    [lein-figwheel "0.5.19"]

@@ -121,6 +121,3 @@
                                    (index-map-from-doc (first docs)))]
                            (merge-with into res i)))
       res)))
-
-;; Persistence
-;; See TODOs in the ns meta

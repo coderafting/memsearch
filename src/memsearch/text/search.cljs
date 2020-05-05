@@ -51,7 +51,6 @@
                            (assoc res (first ks) (m2 (first ks)))))
         res))))
 
-
 (defn scored-docs-for-str-coll
   "Fetches the docs for all the valid words of the supplied collection.
    The score for each fetched doc is combined (added) for each word of the words collection, 
