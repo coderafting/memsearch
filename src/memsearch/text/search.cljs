@@ -16,16 +16,16 @@
     (fm/jaro-winkler w st)))
 
 (defn scored-doc-for-a-word
-  "Returns a map with doc-id as key and a map (with :score) as value.
-   The supplied doc is expected to have :id and :frequency of the supplied word."
+  "Returns a map with doc-id as key and a map (with `:score`) as value.
+   The supplied doc is expected to have `:id` and `:frequency` of the supplied word."
   [w doc]
   (if (:actuals doc)
     {(:id doc) {:score (* (highest-similarity w (:actuals doc)) (:frequency doc))}}
     {(:id doc) {:score (:frequency doc)}}))
 
 (defn scored-docs-for-word
-  "Returns a map with doc-ids as keys and a maps (with :score) as values.
-   The supplied docs are expected to have :id and :frequency of the supplied word."
+  "Returns a map with doc-ids as keys and a maps (with `:score`) as values.
+   The supplied docs are expected to have `:id` and `:frequency` of the supplied word."
   [w docs]
   (loop [ds docs
          res {}]
@@ -34,11 +34,11 @@
       res)))
 
 (defn merge-scored-docs
-  "Example inputs: {1 {:score 10 :data {:age 20}}} and {1 {:score 12 :data {:age 20}} 2 {:score 5 :data {:age 30}}}
-   Return: {1 {:score 22 :data {:age 20}} 2 {:score 5 :data {:age 30}}}
+  "Example inputs: `{1 {:score 10 :data {:age 20}}}` and `{1 {:score 12 :data {:age 20}} 2 {:score 5 :data {:age 30}}}`
+   Return: `{1 {:score 22 :data {:age 20}} 2 {:score 5 :data {:age 30}}}`
    If there are duplicate keys (values are equal):
-    - The values of :score gets added.
-    - The values of :data are expected to be equal in both the inputs, and will be returned as is.
+    - The values of `:score` gets added.
+    - The values of `:data` are expected to be equal in both the inputs, and will be returned as is.
    If the keys are not duplicate, then simply append as a key val pair."
   [m1 m2]
   (let [skeys (keys m2)]
@@ -99,15 +99,15 @@
       :else (scored-docs-for-str-coll s-coll index))))
 
 (defn default-fetch-fn
-  "The db is expected to be a map with doc-ids as keys and maps as values.
-  Each value map may contain the data that needs to come out of the db."
+  "The `db` is expected to be a map with doc-ids as keys and maps as values.
+   Each value map may contain the data that needs to come out of the `db`."
   [db doc-ids]
   (into {} (map #(hash-map % (db %))) doc-ids))
 
 (defn scored-docs-with-data
-  "If a custom fetch fn is not provided in the opts-map, then the db is expected to be a map with doc-ids as keys and maps as values.
-   The return value of fetch-fn is expected to be a map or a coll similar to:
-   {1 {:data {}} 2 {:data {}}} or [{1 {:data {}}} {2 {:data {}}}]"
+  "If a custom fetch fn is not provided in the opts-map, then the `db` is expected to be a map with doc-ids as keys and maps as values.
+   The return value of fetch-fn is expected to be a map or a collection similar to:
+   `{1 {:data {}} 2 {:data {}}}` or `[{1 {:data {}}} {2 {:data {}}}]`."
   [s-coll index db & opts-map]
   (let [docs (scored-docs s-coll index (first opts-map))
         ids (keys docs)
@@ -127,13 +127,13 @@
 (defn text-search
   "Search the index with a string of one or more words.
    Various options can be provided:
-    :db - If provided, the return value will contain additional data from the db based on the doc-ids returned by the index.
-    :fetch-fn - A function with args signature `[db doc-ids]`. Exists only with :db key.
-                It is expected to return results in the form similar to {1 {:data {}} 2 {:data {}}} or [{1 {:data {}}} {2 {:data {}}}].
-                The key `:data `and its value could be any key and value.
-    :sorted? - If `true`, the result should be sorted. Defaults to decreasing order of sorting.
-    :increasing? - Exists only with :sorted? key, a `true` value indicates the sorting to be in the increasing order.
-    :valid-word-fn - A single arity fn that takes one word (string) and returns boolean."
+    - `:db` - If provided, the return value will contain additional data from the db based on the doc-ids returned by the index.
+    - `:fetch-fn` - A function with args signature `[db doc-ids]`. Exists only with `:db` key.
+                    It is expected to return results in the form similar to `{1 {:data {}} 2 {:data {}}}` or `[{1 {:data {}}} {2 {:data {}}}]`.
+                    The key `:data `and its value could be any key and value.
+    - `:sorted?` - If `true`, the result should be sorted. Defaults to decreasing order of sorting.
+    - `:increasing?` - Exists only with `:sorted?` key, a `true` value indicates the sorting to be in the increasing order.
+    - `:valid-word-fn` - A single arity fn that takes one word (string) and returns boolean."
   [query-string index & opts-map]
   (let [opts (first opts-map)
         db (:db opts)
