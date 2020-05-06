@@ -97,14 +97,14 @@ Examples below:
 (def sample-index (ms/text-index [...data...]))
 (def sample-db {...data...})
 
-(m/text-search "knuth on programming" sample-index)
+(ms/text-search "knuth on programming" sample-index)
 =>
     {1 {:score 3}
      35 {:score 0.9022727272727272}
      4 {:score 0.9714285714285714}
      36 {:score 2.7818181818181817}}
 
-(m/text-search "knuth on programming" sample-index {:db sample-db :sorted? true})
+(ms/text-search "knuth on programming" sample-index {:db sample-db :sorted? true})
 =>
     {1 {:score 3 :data {}}
      36 {:score 2.7818181818181817 :data {}}
