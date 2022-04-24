@@ -138,4 +138,4 @@ Github issues are a good way to discuss library related topics. I am also reacha
 - Sync with saved index on every mutation of the index.
 
 ## License
-Distributed under the MIT License. Copyright (c) 2020 [Amarjeet Yadav](https://coderafting.com/).
+Distributed under the MIT License. Copyright (c) 2020-today [Amarjeet Yadav](https://coderafting.com/).
