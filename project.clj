@@ -1,5 +1,5 @@
 (defproject coderafting/memsearch "0.1.0"
-  :author "Amarjeet Yadav <https://www.coderafting.com/>"
+  :author "Amarjeet Yadav <https://coderafting.com/>"
   :description "A ClojureScript library to provide in-memory full-text indexing and search facilities."
   :url "https://github.com/coderafting/memsearch"
   :license {:name "The MIT License"

@@ -117,7 +117,7 @@ The :data key is coming from the db, it can be any key and value.
 Please see the **TODOs** section for future plans to improvise search.
 
 ## Feedback/Discussions
-Github issues are a good way to discuss library related topics. I am also reachable via [CodeRafting](https://www.coderafting.com/).
+Github issues are a good way to discuss library related topics. I am also reachable via [CodeRafting](https://coderafting.com/).
 
 ## Some high-level TODOs (not in the order of priority)
 
@@ -138,4 +138,4 @@ Github issues are a good way to discuss library related topics. I am also reacha
 - Sync with saved index on every mutation of the index.
 
 ## License
-Distributed under the MIT License. Copyright (c) 2020 [Amarjeet Yadav](https://www.coderafting.com/).
+Distributed under the MIT License. Copyright (c) 2020 [Amarjeet Yadav](https://coderafting.com/).
