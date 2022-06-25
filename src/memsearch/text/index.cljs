@@ -5,7 +5,8 @@
           4 "Sync with the saved index on every dynamic mutation of the index"}}
   memsearch.text.index
   (:require [memsearch.text.stopwords :as sw]
-            [clj-fuzzy.phonetics :as ph]))
+            [clj-fuzzy.phonetics :as ph]
+            [clojure.string :as str]))
 
 (defn 
   ^{:doc "This is the default string sanitization function."
@@ -13,25 +14,25 @@
   prep-string
   [s]
   (-> s
-      (clojure.string/replace "\n" " ")
-      (clojure.string/replace #"[^A-Za-z0-9 ]" "")
-      (clojure.string/lower-case)))
+      (str/replace "\n" " ")
+      (str/replace #"[^A-Za-z0-9 ]" "")
+      (str/lower-case)))
 
 (defn 
   ^{:doc "This is the default word validation function."
     :todo "An option should be provided to users to allow for custom validator functions."}
   valid-word?
   [s]
-  (let [st (clojure.string/trim (clojure.string/replace s "\n" " "))]
+  (let [st (str/trim (str/replace s "\n" " "))]
     (and
-     (not (sw/stop-words (clojure.string/lower-case st)))
+     (not (sw/stop-words (str/lower-case st)))
      (> (count st) 1))))
 
 (declare prep-string-coll)
 
 (defn string-vec-helper
   [s]
-  (let [str-coll (clojure.string/split s #" ")]
+  (let [str-coll (str/split s #" ")]
     (if (> (count str-coll) 1)
       (prep-string-coll str-coll)
       s)))
@@ -40,22 +41,22 @@
   "Creates a collection of prepped and valid words. Input is a collection of strings.
    Users may provide their own `valid-word-fn`."
   [str-coll & valid-word-fn]
-  (flatten (remove nil? (map #(if (if (first valid-word-fn) ((first valid-word-fn) %) (valid-word? %))
+  (flatten (remove nil? (map #(when (if (first valid-word-fn) ((first valid-word-fn) %) (valid-word? %))
                                 (string-vec-helper (prep-string %)))
                              str-coll))))
 
 (defn index-keys-from-string
   "Creates a collection of prepped and valid words from a string.
    Users may provide their own `valid-word-fn`."
-  ([s] (prep-string-coll (clojure.string/split s #" ")))
-  ([s valid-word-fn] (prep-string-coll (clojure.string/split s #" ") valid-word-fn)))
+  ([s] (prep-string-coll (str/split s #" ")))
+  ([s valid-word-fn] (prep-string-coll (str/split s #" ") valid-word-fn)))
 
 (defn index-map-from-doc
   "Builds an index map from a document. A document is a map with two keys - `:id` and `:content`.
    The `:id` is the unique identifier for the document that the users can use during search to get the actual document.
    The `:content` key is the string whose words will be indexed.
    Users may provide an opts-map with keys `:maintain-actual?` and `:valid-word-fn`.
-    - When `:maintain-actual?` is `true`, the actual indexed words along with the encoded form of the words.
+    - When `:maintain-actual?` is `true`, the actual indexed words are saved along with the encoded form of the words.
     - The `:valid-word-fn` is a custom word validator that users may provide.
    Note that maintaining actual words will consume additional space.
    Sample input: 

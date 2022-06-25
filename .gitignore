@@ -20,3 +20,4 @@ system\.properties
 rough-notes.md
 /testdata
 .calva
+.cpcache/

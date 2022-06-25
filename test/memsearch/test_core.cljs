@@ -1,12 +1,25 @@
 (ns memsearch.test-core
   (:require
-   [cljs.test :refer-macros [is are deftest testing use-fixtures]]
+   [cljs.test :refer-macros [is deftest testing]]
    [memsearch.core :as m]))
+
+(deftest sample-test
+  (testing "Sample"
+    (is ( = 1 1))))
+
+(def sample-data
+  [{:id 1 :content "I’ve been programming in functional and procedural programming languages. The functional language is Clojure, and the procedural language is Go."}
+   {:id 2 :content "Music pleases soul and mind."}])
+
+;; Key checks to cover:
+;; - Create index, with maintaining original too
+;; - Check if the frequency matches in the index as expected
+;; - 
 
 ;; TODO
 ;; Complete test and benchmarks
 
-#_(def test-data "take from /testdata/data.edn")
+;;(def test-data "/testdata/data.edn")
 ;(/ (count (vec (str (mapv #(:content %) test-data)))) 3)
 
 #_(def test-db
