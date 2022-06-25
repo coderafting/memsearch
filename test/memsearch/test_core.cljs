@@ -4,10 +4,6 @@
    [memsearch.core :as m]
    [memsearch.text.search :as ms]))
 
-(deftest sample-test
-  (testing "Sample"
-    (is (= 1 1))))
-
 (def sample-data
   [{:id 1 :content "I've been programming in functional and procedural programming languages. The functional language is Clojure, and the procedural language is Go."}
    {:id 2 :content "Music pleases soul and mind. We can generate music using Clojure"}])
