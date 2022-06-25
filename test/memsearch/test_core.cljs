@@ -1,33 +1,50 @@
 (ns memsearch.test-core
   (:require
-   [cljs.test :refer-macros [is are deftest testing use-fixtures]]
-   [memsearch.core :as m]))
+   [cljs.test :refer-macros [is deftest testing]]
+   [memsearch.core :as m]
+   [memsearch.text.search :as ms]))
 
-;; TODO
-;; Complete test and benchmarks
+(def sample-data
+  [{:id 1 :content "I've been programming in functional and procedural programming languages. The functional language is Clojure, and the procedural language is Go."}
+   {:id 2 :content "Music pleases soul and mind. We can generate music using Clojure"}])
 
-#_(def test-data "take from /testdata/data.edn")
-;(/ (count (vec (str (mapv #(:content %) test-data)))) 3)
+;; Key checks to cover:
+;; - Create index, with maintaining original too
+;; - Check if stop words and unexpected characters are not included in the index
+;; - Check if the frequency matches in the index as expected
+;; - Check is the search is working as expected, with spelling mistakes
 
-#_(def test-db
-  (into {}
-        (map #(hash-map (:id %) {:content (:content %)}) test-data)))
+(deftest text-index
+  (let [index (m/text-index sample-data {:maintain-actual? true})]
+    (testing "Indexing and Search"
+      (is (= 12 (count index)))
 
-#_(def sample-index (m/text-index test-data {:maintain-actual? true}))
+      (let [indexed-docs (ms/fetch-docs-for-a-word "clojure" index)]
+        (is (= 2 (count indexed-docs))))
 
-#_(time (m/text-index test-data {:maintain-actual? true}))
-#_(count (m/text-index test-data {:maintain-actual? true}))
-; about 45ms to index by parsing about 1500 words to generate 180 unique index keys with their values
-; about 90ms to index by parsing about 3800 words to generate about 454 unique index keys with their values
-; will have to test with a different same sizes to get benchmarks for different scale.
+      (let [indexed-docs (ms/fetch-docs-for-a-word "closure" index)]
+        (is (= 2 (count indexed-docs))))
 
-#_(time (m/text-search "object oriented programming" sample-index {:db test-db :sorted? true}))
-;; 17ms, 10 results, includes data fetch from the db, with 25 docs (with about 60 words each)
+      (let [indexed-docs (ms/fetch-docs-for-a-word "clojur" index)]
+        (is (= 2 (count indexed-docs))))
 
-#_(time (m/text-search "knuth on programming" sample-index {:db test-db :sorted? true}))
-;; 23ms, 16 results, includes data fetch from the db, with 50 docs (with about 75 words each)
+      (let [indexed-docs (ms/fetch-docs-for-a-word "language" index)
+            {:keys [id actuals frequency]} (first indexed-docs)]
+        (is (= 1 (count indexed-docs)))
+        (is (and (= 1 id) (= 3 frequency) (= #{"languages" "language"} actuals)))))))
 
-#_(time (m/text-search "knuth on programming" sample-index))
-;; 18ms, without data merge from db and without sorting
-
-;; Benchmark with :maintain-actual? false
+(deftest text-search
+  (let [index (m/text-index sample-data)]
+    (testing "Simple search"
+      (let [result (m/text-search "language" index)]
+        (is (= 1 (count result)))
+        (is (get result 1))))
+    
+    (testing "Search with spelling variations"
+      (let [result (m/text-search "languaze" index)]
+        (is (= 1 (count result)))
+        (is (get result 1)))
+      
+      (let [result (m/text-search "languazes" index)]
+        (is (= 1 (count result)))
+        (is (get result 1))))))

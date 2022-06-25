@@ -14,7 +14,7 @@ The indexing facility is offerd via `memsearch.core/text-index` function, and th
 ### Setup
 Add this library as a dependency to your project as:
 ```clojure
-[coderafting/memsearch "0.1.0"]
+[coderafting/memsearch "0.1.1"]
 ```
 Require `memsearch.core` in your working namespace.
 ```clojure
@@ -129,7 +129,6 @@ Github issues are a good way to discuss library related topics. I am also reacha
 #### Search and Index Improvization
 - While computing score, take into account the `relative distance` between any two words (of the search string) in the results' content. In order to achieve this, the index will have to maintain the position(s) of the word in the documents' content. This becomes important when the content of the document is large (ex: a blog).
 - Consideration of the `weights of words` based on what content they exist in. In order to achieve this, the index will have to take different types of contents into account. Ex: `{:content {:title "" :blog ""}}`.
-- Adopt `eager evaluation paradigm` to gain performance with some custom transducers. This will be helpful for large data-set (either content of the doc is large or large number of docs or both).
 
 #### Index persistence
 - Save index to disk
