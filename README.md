@@ -14,7 +14,7 @@ The indexing facility is offerd via `memsearch.core/text-index` function, and th
 ### Setup
 Add this library as a dependency to your project as:
 ```clojure
-[coderafting/memsearch "0.2.0"]
+[coderafting/memsearch "0.1.1"]
 ```
 Require `memsearch.core` in your working namespace.
 ```clojure
